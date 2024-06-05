@@ -1,81 +1,43 @@
 import { useState } from "react";
-import produce from "immer";
-import { NavBar } from "./components/NavBar";
-import { Cart } from "./components/Cart";
-import { ExpandableText } from "./components/ExpandableText";
+import { ExpenseList } from "./components/expense-tracker/components/ExpenseList";
+import { ExpenseFilter } from "./components/expense-tracker/components/ExpenseFilter";
+import { ExpenseForm } from "./components/expense-tracker/components/ExpenseForm";
+import categories from "./components/expense-tracker/categories";
 
 function App() {
-  const [cartItems, setCartItems] = useState(["Product1", "Product2"]);
+  const [selectedCategory, setSelectedCategory] = useState("");
 
-  const [game, setGame] = useState({
-    id: 1,
-    player: {
-      name: "John",
-    },
-  });
+  const [expenses, setExpenses] = useState([
+    { id: 1, description: "aaa", amount: 10, category: "Utilities" },
+    { id: 2, description: "bbb", amount: 10, category: "Utilities" },
+    { id: 3, description: "ccc", amount: 10, category: "Utilities" },
+    { id: 4, description: "ddd", amount: 10, category: "Utilities" },
+  ]);
 
-  const gameHandleClick = () => {
-    setGame({ ...game, player: { ...game.player, name: "Bob" } });
+  const handleDelete = (id: number) => {
+    setExpenses(expenses.filter((e) => e.id !== id));
   };
 
-  const [pizza, setPizza] = useState({
-    name: "Spicy Pepperoni",
-    toppings: ["Mushroom"],
-  });
-
-  const pizzaHandleClick = () => {
-    setPizza({ ...pizza, toppings: [...pizza.toppings, "Cheese"] });
-  };
-
-  const [shop, setShop] = useState({
-    discount: 0.1,
-    items: [
-      { id: 1, title: "Product 1", quantity: 1 },
-      { id: 2, title: "Product 2", quantity: 1 },
-    ],
-  });
-
-  const shopHandleClick = (id: number) => {
-    setShop({
-      ...shop,
-      items: shop.items.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      ),
-    });
-  };
+  const visibleExpenses = selectedCategory
+    ? expenses.filter((e) => e.category === selectedCategory)
+    : expenses;
 
   return (
-    <>
-      <NavBar carItemsCount={cartItems.length} />
-      <Cart carItems={cartItems} onClear={() => setCartItems([])} />
-      <p onClick={gameHandleClick}>
-        {game.id} {game.player.name}
-      </p>
-      <p onClick={pizzaHandleClick}>
-        {pizza.name} {pizza.toppings.join(", ")}
-      </p>
-      <ul>
-        {shop.items.map((item) => (
-          <li key={item.id} onClick={() => shopHandleClick(item.id)}>
-            {item.id} {item.title} {item.quantity}
-          </li>
-        ))}
-      </ul>
-
-      <ExpandableText maxChar={100}>
-        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Similique
-        doloremque ad ex atque incidunt, quo harum, quas vero iure suscipit,
-        nemo animi rerum ducimus illo assumenda alias vitae cupiditate? Aliquam
-        iste inventore quia, debitis quod ut sequi ab similique suscipit,
-        possimus reiciendis molestias esse harum doloremque architecto ratione
-        error quisquam, velit asperiores quas laborum necessitatibus vel.
-        Voluptate minus, ex quia eius odit sapiente, repellat, quae assumenda
-        molestiae alias modi tempora magnam? Sed laborum fugiat quos rem optio
-        sapiente aspernatur ab facere, maiores numquam ex reprehenderit expedita
-        doloribus assumenda quibusdam eos? Assumenda omnis, dolorum dolores
-        possimus cupiditate dicta nulla nesciunt id!
-      </ExpandableText>
-    </>
+    <div>
+      <div className="mb-5">
+        <ExpenseForm
+          onSubmit={(expense) =>
+            setExpenses([...expenses, { ...expense, id: expenses.length + 1 }])
+          }
+        />
+      </div>
+      <div className="mb-3">
+        <ExpenseFilter
+          onSelectCategory={(category) => setSelectedCategory(category)}
+        />
+      </div>
+      <ExpenseList expenses={visibleExpenses} onDelete={handleDelete} />
+    </div>
   );
 }
 
